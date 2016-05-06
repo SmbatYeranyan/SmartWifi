@@ -31,10 +31,19 @@ class SmartWifi
     void clearEEPROM();
     void hardReboot();
     bool testWifiConnection();
+    void launchWeb();
+    void setupAP();
+    void createWebServer();
 
   private:
-    int _pin;
-    String content;
+	WiFiClient client;
+	bool setupMode = false;
+	ESP8266WebServer server;
+	String deviceId;
+	const char* ssid;
+	const char* passphrase;
+	String st;
+	String content;
     String statusCode;
     Pins pins;
 };
