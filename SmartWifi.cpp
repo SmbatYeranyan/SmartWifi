@@ -9,7 +9,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 
-Pins pins;
+
 ESP8266WebServer server(80);
 SmartWifi::SmartWifi()
 {
@@ -17,22 +17,30 @@ SmartWifi::SmartWifi()
   //this->dot = dot();
   
 }
-void SmartWifi::init(Print &print){
+void SmartWifi::init(Print &print, int resetButton, int reset, int error, int state){
   printer = &print;
-;
-  // pins.resetButton = setPins.resetButton;
-  // pins.reset = setPins.reset;
-  // pins.error = setPins.error;
-  // pins.state = setPins.state;
+
+  pins.resetButton = resetButton;
+  pins.reset = reset;
+  pins.error = error;
+  pins.state = state;
+
   pinMode(pins.reset, OUTPUT);
   pinMode(pins.state, OUTPUT);
   pinMode(pins.error, OUTPUT);
   digitalWrite(pins.reset, HIGH);
   digitalWrite(pins.error, HIGH);
   pinMode(pins.resetButton, INPUT_PULLUP);
-  printer->println("Init");
-  //attachInterrupt(digitalPinToInterrupt(pins.resetButton), resetButton, CHANGE);
+  printer->println("Init with ");
+  printer->println(pins.resetButton);
+  printer->println(pins.reset);
+  printer->println(pins.error);
+  printer->println(pins.state);
+
+
 }
+
+
 void SmartWifi::SetupWifi(){
   EEPROM.begin(512);
   
@@ -227,8 +235,14 @@ void SmartWifi::launchWeb(int webtype) {
 }
 
 void SmartWifi::handleCycle(){
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillisReboot >= intervalReboot) {
+    // save the last time you blinked the LED
+      previousMillisReboot = currentMillis;
+    ESP.restart();
+  }
   if (setupMode){
-    //intervalReboot = 360000;
+    intervalReboot = 360000;
     server.handleClient();
   }else{
     //webSocketLoop(); 

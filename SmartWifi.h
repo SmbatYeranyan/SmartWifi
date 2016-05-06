@@ -9,19 +9,17 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
-
-struct Pins{
+struct Pins {
   int resetButton = 12;
   int reset = 5;
   int error = 14;
   int state = 16;
 };
-
 class SmartWifi
 {
   public:
   	SmartWifi();
-  	void init(Print &print);
+  	void init(Print &print, int resetButton, int reset, int error, int state);
     void SetupWifi();
     String* getWifiCredentials();
     String* getDeviceId();
@@ -33,18 +31,26 @@ class SmartWifi
     void createWebServer(int webtype);
     void launchWeb(int webtype);
     void handleCycle();
-    
+    void resetButton();
+    String deviceId;
+	bool setupMode = false;
+
   private:
 	WiFiClient client;
-	bool setupMode = false;
-	String deviceId;
 	const char* ssid;
 	const char* passphrase;
 	String st;
 	String content;
+	String apName = "SmartWifi";
     String statusCode;
     String uiTitle ="SmartWifi";
-    void resetButton();
     Pins pins;
     Print* printer;
+
+	unsigned long previousMillis = 0;        // will store last time LED was updated
+	const long interval = 35;
+	unsigned long previousMillisReboot = 0;        // will store last time LED was updated
+	long intervalReboot = 5000000;
+	int brightness = 0;    // how bright the LED is
+	int fadeAmount = 5;
 };
