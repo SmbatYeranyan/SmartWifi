@@ -127,9 +127,12 @@ void SmartWifi::launchWeb(int webtype) {
   Serial.println("Server started"); 
 }
 
-void SmartWifi::setupAP(void) {
+void SmartWifi::setupAP(char* apName) {
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
+  if (!apName){
+    apName ="SmartWifi";
+  }
   delay(100);
   int n = WiFi.scanNetworks();
   Serial.println("scan done");
@@ -167,7 +170,7 @@ void SmartWifi::setupAP(void) {
     }
  
   delay(100);
-  WiFi.softAP("ZakuAI");
+  WiFi.softAP(apName);
   Serial.println("softap");
   launchWeb(1);
   Serial.println("over");
@@ -176,7 +179,7 @@ void SmartWifi::setupAP(void) {
 void SmartWifi::createWebServer(int webtype){
 
   if ( webtype == 1 ) {
-    server.on("/", []() {
+    server.on("/", [this]() {
         content="";
         IPAddress ip = WiFi.softAPIP();
         String ipStr = String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3]);
@@ -191,37 +194,38 @@ void SmartWifi::createWebServer(int webtype){
          //content += "</html>";
         server.send(200, "text/html", content);  
     });
-    server.on("/setting", []() {
+    server.on("/setting", [this]() {
         String qsid = server.arg("ssid");
         String qpass = server.arg("pass");
         String qid = server.arg("device");
-
+        content ="";
         if (qsid.length() > 0 && qpass.length() > 0) {
-          smartWifi.writeCredentials(qsid, qpass, qid);
+          writeCredentials(qsid, qpass, qid);
    
         } else {
           content = "{\"Error\":\"404 not found\"}";
           statusCode = 404;
           Serial.println("Sending 404");
         }
-        server.send(statusCode, "application/json", content);
+ 
+        server.send(200, "application/json", content);
         WiFi.disconnect();
         delay(2000);
         EEPROM.end();
-        smartWifi.resetBoard();
+        hardReboot();
     });
   } else if (webtype == 0) {
-    server.on("/", []() {
+    server.on("/", [this]() {
       IPAddress ip = WiFi.localIP();
       String ipStr = String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3]);
       server.send(200, "application/json", "{\"IP\":\"" + ipStr + "\"}");
     });
-    server.on("/cleareeprom", []() {
+    server.on("/cleareeprom", [this]() {
       content = "<!DOCTYPE HTML>\r\n<html>";
       content += "<p>Clearing the EEPROM</p></html>";
       server.send(200, "text/html", content);
-      smartWifi.clearEEPROM();
-      smartWifi.resetBoard();
+      clearEEPROM();
+      hardReboot();
     });
   }
 }

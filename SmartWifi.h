@@ -31,9 +31,7 @@ class SmartWifi
     void clearEEPROM();
     void hardReboot();
     bool testWifiConnection();
-    void launchWeb();
-    void setupAP();
-    void createWebServer();
+    void setupAP(char* apName);
 
   private:
 	WiFiClient client;
@@ -46,7 +44,9 @@ class SmartWifi
 	String content;
     String statusCode;
     Pins pins;
-    String uiTitle ="SmartWifi"
+    String uiTitle ="SmartWifi";
+    void createWebServer(int webtype);
+    void launchWeb(int webtype);
 };
 
 #endif
