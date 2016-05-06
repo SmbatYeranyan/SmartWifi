@@ -3,50 +3,48 @@
   Created by Smbat Yeranyan, May 5, 2016.
   Released into the public domain.
 */
-#ifndef SmartWifi_h
-#define SmartWifi_h
+
 
 #include "Arduino.h"
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
 
-
 struct Pins{
-  int resetButton;
-  int reset;
-  int error;
-  int state;
+  int resetButton = 12;
+  int reset = 5;
+  int error = 14;
+  int state = 16;
 };
 
 class SmartWifi
 {
   public:
-  	SmartWifi(Pins pins);
-
+  	SmartWifi();
+  	void init(Print &print);
+    void SetupWifi();
     String* getWifiCredentials();
     String* getDeviceId();
-
     void writeCredentials(String qsid, String qpass, String qid);
     void clearEEPROM();
     void hardReboot();
     bool testWifiConnection();
-    void setupAP(char* apName);
-
+    void setupAP();
+    void createWebServer(int webtype);
+    void launchWeb(int webtype);
+    void handleCycle();
+    
   private:
 	WiFiClient client;
 	bool setupMode = false;
-	ESP8266WebServer server;
 	String deviceId;
 	const char* ssid;
 	const char* passphrase;
 	String st;
 	String content;
     String statusCode;
-    Pins pins;
     String uiTitle ="SmartWifi";
-    void createWebServer(int webtype);
-    void launchWeb(int webtype);
+    void resetButton();
+    Pins pins;
+    Print* printer;
 };
-
-#endif
