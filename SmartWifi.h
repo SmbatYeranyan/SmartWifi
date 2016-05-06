@@ -46,6 +46,7 @@ class SmartWifi
 	String content;
     String statusCode;
     Pins pins;
+    String uiTitle ="SmartWifi"
 };
 
 #endif
